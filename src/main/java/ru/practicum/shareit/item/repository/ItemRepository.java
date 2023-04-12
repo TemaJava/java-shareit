@@ -28,8 +28,7 @@ public class ItemRepository {
         List<Item> list = itemsByUser.get(userId);
         if (list.size() != 0) {
             log.info("отправка списка item пользователя с id - {}", userId);
-            return list.stream().map(ItemMapper::createItemDto).
-                    collect(Collectors.toList());
+            return list.stream().map(ItemMapper::createItemDto).collect(Collectors.toList());
         } else {
             log.warn("пользователь с id {}", userId);
             throw new ObjectNotFoundException("Пользователь с таким id не найден");
