@@ -3,12 +3,10 @@ package ru.practicum.shareit.item.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Repository
 @Slf4j
