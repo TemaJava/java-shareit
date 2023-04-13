@@ -24,31 +24,19 @@ public class ItemRepository {
         this.generatedId = 1;
     }
 
-    public List<ItemDto> getAllItems(long userId) {
+    public List<Item> getAllItems(long userId) {
         List<Item> list = itemsByUser.get(userId);
-        if (list.size() != 0) {
-            log.info("отправка списка item пользователя с id - {}", userId);
-            return list.stream().map(ItemMapper::createItemDto).collect(Collectors.toList());
-        } else {
-            log.warn("пользователь с id {}", userId);
-            throw new ObjectNotFoundException("Пользователь с таким id не найден");
-        }
+        log.info("отправка списка item пользователя с id - {}", userId);
+        return list;
     }
 
-    public ItemDto findItemById(long itemId) {
-        Item item = itemById.get(itemId);
-        if (item != null) {
-            log.info("Найден item c id {}", itemId);
-            return ItemMapper.createItemDto(item);
-        } else {
-            throw new ObjectNotFoundException("Item с таким id не найден");
-        }
+    public Item findItemById(long itemId) {
+        return itemById.get(itemId);
     }
 
-    public ItemDto createItem(long userId, ItemDto itemDto) {
+    public Item createItem(long userId, Item item) {
         long newId = generatedId++;
-        itemDto.setId(newId);
-        Item item = ItemMapper.createItem(itemDto, userId);
+        item.setId(newId);
         if (itemsByUser.containsKey(userId)) {
             itemsByUser.get(userId).add(item);
         } else {
@@ -57,20 +45,11 @@ public class ItemRepository {
             itemsByUser.put(userId, newList);
         }
         itemById.put(newId, item);
-        return  ItemMapper.createItemDto(item); //доп проверка
+        return item; //доп проверка
     }
 
-    public ItemDto updateItem(long userId, long itemId, Item item) {
-        if (!itemsByUser.containsKey(userId)) {
-            throw new ObjectNotFoundException("Пользователь не найден");
-        }
+    public Item updateItem(long userId, long itemId, Item item) {
         Item updatingItem = itemById.get(itemId);
-        if (item != null) {
-            log.info("Найден item c id {}", itemId);
-        } else {
-            throw new ObjectNotFoundException("Item с таким id не найден");
-        }
-
         if (item.getName() != null) {
             updatingItem.setName(item.getName());
         }
@@ -81,7 +60,6 @@ public class ItemRepository {
             updatingItem.setAvailable(item.getAvailable());
         }
         //пользователь не обновляется
-
         for (Item userItem : itemsByUser.get(userId)) {
             if (userItem.getId() == itemId) {
                 itemsByUser.get(userId).remove(userItem);
@@ -89,19 +67,34 @@ public class ItemRepository {
             }
         }
         itemById.replace(updatingItem.getId(), updatingItem);
-        return ItemMapper.createItemDto(updatingItem);
+        return updatingItem;
     }
 
-    public List<ItemDto> findItem(String string) {
-        List<ItemDto> itemsToResponse = new ArrayList<>();
+    public List<Item> findItem(String string) {
+        List<Item> itemsToResponse = new ArrayList<>();
         for (Item item : itemById.values()) {
             if (item.getName().toLowerCase().contains(string.toLowerCase()) ||
                     item.getDescription().toLowerCase().contains(string.toLowerCase())) {
                 if (item.getAvailable()) {
-                    itemsToResponse.add(ItemMapper.createItemDto(item));
+                    itemsToResponse.add(item);
                 }
             }
         }
         return itemsToResponse;
+    }
+
+    public void checkItemExist(long itemId) {
+        Item item = itemById.get(itemId);
+        if (item != null) {
+            log.info("Найден item c id {}", itemId);
+        } else {
+            throw new ObjectNotFoundException("Item с таким id не найден");
+        }
+    }
+
+    public void checkItemByUser(long userId) {
+        if (!itemsByUser.containsKey(userId)) {
+            throw new ObjectNotFoundException("Пользователь не найден");
+        }
     }
 }

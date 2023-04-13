@@ -22,53 +22,37 @@ public class UserRepository {
         this.generatedId = 1;
     }
 
-    public List<UserDto> getAllUsers() {
-        List<UserDto> responseList = new ArrayList<>();
-        for (User user : usersMap.values()) {
-            responseList.add(UserMapper.toUserDto(user));
-        }
-        return responseList;
+    public List<User> getAllUsers() {
+        return new ArrayList<>(usersMap.values());
     }
 
-    public UserDto getUserById(long id) {
-        if (usersMap.containsKey(id)) {
-            return UserMapper.toUserDto(usersMap.get(id));
-        } else {
-            throw new ObjectNotFoundException("Пользователь не найден");
-        }
+    public User getUserById(long id) {
+        return usersMap.get(id);
     }
 
-    public UserDto createUser(UserDto userDto) {
-        checkMail(UserMapper.toUser(userDto));
+    public User createUser(User user) {
+        checkMail(user);
         long newId = generatedId++;
-        userDto.setId(newId);
-        usersMap.put(newId, UserMapper.toUser(userDto));
-        return userDto;
+        user.setId(newId);
+        usersMap.put(newId, user);
+        return user;
     }
 
     public User updateUser(long id, User user) {
-        if (usersMap.containsKey(id)) {
-            if (user.getName() != null) {
-                usersMap.get(id).setName(user.getName());
-            }
-            if (user.getEmail() != null) {
-                checkMail(user, id);
-                usersMap.get(id).setEmail(user.getEmail());
-            }
-            return usersMap.get(id);
-        } else {
-            throw new ObjectNotFoundException("Пользователь не найден");
+        if (user.getName() != null) {
+            usersMap.get(id).setName(user.getName());
         }
+        if (user.getEmail() != null) {
+            checkMail(user, id);
+            usersMap.get(id).setEmail(user.getEmail());
+        }
+        return usersMap.get(id);
     }
 
-    public UserDto deleteUser(long id) {
-        if (usersMap.containsKey(id)) {
-            UserDto answUser = UserMapper.toUserDto(usersMap.get(id));
-            usersMap.remove(id);
-            return answUser;
-        } else {
-            throw new ObjectNotFoundException("Пользователь не найден");
-        }
+    public User deleteUser(long id) {
+        User answUser = usersMap.get(id);
+        usersMap.remove(id);
+        return answUser;
     }
 
     public boolean checkIsExist(long id) {
