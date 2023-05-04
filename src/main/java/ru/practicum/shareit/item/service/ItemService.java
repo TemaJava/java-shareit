@@ -14,7 +14,7 @@ public interface ItemService {
 
     ItemBookingDto getItemById(long userId, long ItemId);
 
-    ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
+    ItemDto updateItem(long userId, long itemId, itemDto itemDto);
 
     List<ItemDto> findItem(String string);
 
