@@ -23,4 +23,18 @@ public class ErrorHandler {
         log.warn("409 {}", e.getMessage(), e);
         return new ErrorResponse("Conflict exception 409", e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handlerIncorrectStateException(final IncorrectStateException e) {
+        log.warn("500 {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage(), e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlerBookingException(final BookingException e) {
+        log.warn("400 {}", e.getMessage(), e);
+        return new ErrorResponse("Bad request exception 400", e.getMessage());
+    }
 }
