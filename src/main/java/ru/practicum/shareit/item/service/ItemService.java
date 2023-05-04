@@ -12,9 +12,9 @@ public interface ItemService {
 
     List<ItemBookingDto> getAllUsersItems(long userId);
 
-    ItemBookingDto getItemById(long userId, long ItemId);
+    ItemBookingDto getItemById(long userId, long itemId);
 
-    ItemDto updateItem(long userId, long itemId, itemDto itemDto);
+    ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
     List<ItemDto> findItem(String string);
 
