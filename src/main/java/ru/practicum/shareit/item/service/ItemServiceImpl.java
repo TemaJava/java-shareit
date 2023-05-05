@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
         for (Item item : itemList) {
             Booking lastBooking = null;
             Booking nextBooking = null;
-            List<Booking> bookingList = bookingStorage.findByItemOrderByStart(item);
+            List<Booking> bookingList = bookingStorage.findByItemAndStatusOrderByStart(item, Status.APPROVED);
             for (Booking booking : bookingList) {
                 if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
                         booking.getStart().isBefore(LocalDateTime.now())) ||
@@ -71,8 +71,7 @@ public class ItemServiceImpl implements ItemService {
                 bookingList.remove(lastBooking);
             }
             for (Booking booking : bookingList) {
-                if (booking.getStart().isAfter(LocalDateTime.now())
-                        && (booking.getStatus().equals(Status.WAITING) || booking.getStatus().equals(Status.APPROVED))) {
+                if (booking.getStart().isAfter(LocalDateTime.now())) {
                     nextBooking = booking;
                     break;
                 }
@@ -106,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
 
             Booking lastBooking = null;
             Booking nextBooking = null;
-            List<Booking> bookingList = bookingStorage.findByItemOrderByStart(item);
+            List<Booking> bookingList = bookingStorage.findByItemAndStatusOrderByStart(item, Status.APPROVED);
             for (Booking booking : bookingList) {
                 if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
                         booking.getStart().isBefore(LocalDateTime.now())) ||
@@ -118,8 +117,7 @@ public class ItemServiceImpl implements ItemService {
                     bookingList.remove(lastBooking);
                 }
                 for (Booking booking : bookingList) {
-                    if (booking.getStart().isAfter(LocalDateTime.now())
-                            && (booking.getStatus().equals(Status.WAITING) || booking.getStatus().equals(Status.APPROVED))) {
+                    if (booking.getStart().isAfter(LocalDateTime.now())) {
                         nextBooking = booking;
                         break;
                     }

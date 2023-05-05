@@ -25,9 +25,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerIncorrectStateException(final IncorrectStateException e) {
-        log.warn("500 {}", e.getMessage(), e);
+        log.warn("400 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage(), e.getMessage());
     }
 

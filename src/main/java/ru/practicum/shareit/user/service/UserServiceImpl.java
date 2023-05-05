@@ -44,18 +44,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto updateUser(long id, User newUser) {
+    public UserDto updateUser(long id, UserDto newUser) {
         User user = repository.findById(id).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь с id = " + id + " для обновления не найден");
         });
-        if (newUser.getEmail() != null && !newUser.getEmail().equals(user.getEmail())) {
-            checkIfEmailExists(newUser.getEmail());
+        if (newUser.getEmail() != null && !newUser.getEmail().equals(user.getEmail())
+                && !newUser.getEmail().isBlank()) {
+            //checkIfEmailExists(newUser.getEmail());
             user.setEmail(newUser.getEmail());
         }
-        if (newUser.getName() != null) {
+        if (newUser.getName() != null && !newUser.getName().isBlank()) {
             user.setName(newUser.getName());
         }
-        return UserMapper.toUserDto(repository.save(user));
+        return UserMapper.toUserDto(user);
     }
 
     @Override
@@ -68,9 +69,12 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(user);
     }
 
+    /*
     private void checkIfEmailExists(String email) {
         repository.findByEmail(email).ifPresent(user -> {
             throw new ValidationException(email);
         });
     }
+
+     */
 }
