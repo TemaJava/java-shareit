@@ -4,6 +4,7 @@ import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,4 +24,5 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User author;
+    private LocalDateTime created;
 }

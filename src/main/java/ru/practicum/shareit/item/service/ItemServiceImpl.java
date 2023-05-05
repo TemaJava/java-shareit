@@ -99,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь c id = " + userId + " не найден");
         });
-        List<Comment> commentList = commentStorage.findAllByItem(item);
+        List<Comment> commentList = commentStorage.findAllComments(List.of(item.getId()));
         List<CommentDto> commentDtoList = commentList.stream()
                 .map(CommentMapper::toCommentDto).collect(Collectors.toList());
         if (item.getUser().getId() == userId) {
@@ -172,6 +172,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        commentDto.setCreated(LocalDateTime.now());
         User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id + " +
                 userId + " не обнаружен"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->

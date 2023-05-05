@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS COMMENTS
     TEXT VARCHAR not null,
     ITEM_ID BIGINT not null,
     USER_ID BIGINT not null,
+    CREATED TIMESTAMP WITHOUT TIME ZONE not null,
     CONSTRAINT fk_item_comment FOREIGN KEY (item_id) REFERENCES items (id),
     CONSTRAINT fk_author FOREIGN KEY (user_id) REFERENCES users (id)
 );
