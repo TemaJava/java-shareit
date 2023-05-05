@@ -99,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь c id = " + userId + " не найден");
         });
-        List<Comment> commentList = commentStorage.findCommentsByItemOrderByCreatedDesc(item);
+        List<Comment> commentList = commentStorage.findByItemOrderByCreatedDesc(item);
         List<CommentDto> commentDtoList = commentList.stream()
                 .map(CommentMapper::toCommentDto).collect(Collectors.toList());
         if (item.getUser().getId() == userId) {
