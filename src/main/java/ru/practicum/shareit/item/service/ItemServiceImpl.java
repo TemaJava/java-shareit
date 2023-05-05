@@ -172,7 +172,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        commentDto.setCreated(LocalDateTime.now());
         User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id + " +
                 userId + " не обнаружен"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
