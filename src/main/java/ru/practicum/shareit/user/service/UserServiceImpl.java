@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -68,13 +67,4 @@ public class UserServiceImpl implements UserService {
         repository.delete(user);
         return UserMapper.toUserDto(user);
     }
-
-    /*
-    private void checkIfEmailExists(String email) {
-        repository.findByEmail(email).ifPresent(user -> {
-            throw new ValidationException(email);
-        });
-    }
-
-     */
 }

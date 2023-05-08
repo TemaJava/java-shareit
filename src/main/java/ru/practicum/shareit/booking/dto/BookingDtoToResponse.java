@@ -32,7 +32,7 @@ public class BookingDtoToResponse {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class BookingItemDto{
+    public static class BookingItemDto {
         @NotNull
         private Long id;
         @NotBlank
