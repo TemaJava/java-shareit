@@ -25,7 +25,11 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -55,28 +59,32 @@ public class ItemServiceImpl implements ItemService {
 
         List<Item> itemList = itemStorage.findAllByUserIdOrderByIdAsc(userId);
         List<ItemBookingDto> itemBookingDtos = new ArrayList<>();
+        //помогло избежать обращений к бд в цикле
+        Map<Item, List<Booking>> bookings = bookingStorage.findByItemInOrderByStart(itemList)
+                .stream()
+                .collect(groupingBy(Booking::getItem, toList()));
         for (Item item : itemList) {
             Booking lastBooking = null;
             Booking nextBooking = null;
-            List<Booking> bookingList = bookingStorage.findByItemAndStatusOrderByStart(item, Status.APPROVED);
-            for (Booking booking : bookingList) {
-                if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
-                        booking.getStart().isBefore(LocalDateTime.now())) ||
-                        booking.getEnd().isBefore(LocalDateTime.now())) {
-                    lastBooking = booking;
+            if (bookings.get(item) != null) {
+                List<Booking> bookingList = new ArrayList<>(bookings.get(item));
+                for (Booking booking : bookingList) {
+                    if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
+                            booking.getStart().isBefore(LocalDateTime.now())) ||
+                            booking.getEnd().isBefore(LocalDateTime.now())) {
+                        lastBooking = booking;
+                    }
+                }
+                if (lastBooking != null) {
+                    bookingList.remove(lastBooking);
+                }
+                for (Booking booking : bookingList) {
+                    if (booking.getStart().isAfter(LocalDateTime.now())) {
+                        nextBooking = booking;
+                        break;
+                    }
                 }
             }
-
-            if (lastBooking != null) {
-                bookingList.remove(lastBooking);
-            }
-            for (Booking booking : bookingList) {
-                if (booking.getStart().isAfter(LocalDateTime.now())) {
-                    nextBooking = booking;
-                    break;
-                }
-            }
-
             BookingDto nextBookingDto = null;
             BookingDto lastBookingDto = null;
             if (nextBooking != null) {
@@ -100,9 +108,8 @@ public class ItemServiceImpl implements ItemService {
         });
         List<Comment> commentList = commentStorage.findAllComments(List.of(item.getId()));
         List<CommentDto> commentDtoList = commentList.stream()
-                .map(CommentMapper::toCommentDto).collect(Collectors.toList());
+                .map(CommentMapper::toCommentDto).collect(toList());
         if (item.getUser().getId() == userId) {
-
             Booking lastBooking = null;
             Booking nextBooking = null;
             List<Booking> bookingList = bookingStorage.findByItemAndStatusOrderByStart(item, Status.APPROVED);
@@ -144,10 +151,10 @@ public class ItemServiceImpl implements ItemService {
         if (!(userId == item.getUser().getId())) {
             throw new ObjectNotFoundException("Предмет не принадлежит пользователю");
         }
-        if (updatedItem.getName() != null) {
+        if (updatedItem.getName() != null && !updatedItem.getName().isBlank()) {
             item.setName(updatedItem.getName());
         }
-        if (updatedItem.getDescription() != null) {
+        if (updatedItem.getDescription() != null && !updatedItem.getDescription().isBlank()) {
             item.setDescription(updatedItem.getDescription());
         }
         if (updatedItem.getAvailable() != null) {
@@ -163,7 +170,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         } else {
             return itemStorage.findAllByString(string).stream()
-                    .map(ItemMapper::createItemDto).collect(Collectors.toList());
+                    .map(ItemMapper::createItemDto).collect(toList());
         }
     }
 
