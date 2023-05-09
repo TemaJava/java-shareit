@@ -3,8 +3,6 @@ package ru.practicum.shareit.booking.dto;
 import lombok.*;
 import ru.practicum.shareit.booking.model.Status;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,7 +23,6 @@ public class BookingDtoToResponse {
     @Setter
     @AllArgsConstructor
     public static class BookingBookerDto {
-        @NotNull
         private Long id;
     }
 
@@ -33,9 +30,7 @@ public class BookingDtoToResponse {
     @Setter
     @AllArgsConstructor
     public static class BookingItemDto {
-        @NotNull
         private Long id;
-        @NotBlank
         private String name;
     }
 }

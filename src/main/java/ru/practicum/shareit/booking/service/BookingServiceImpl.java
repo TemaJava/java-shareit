@@ -20,7 +20,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,9 +48,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new BookingException("Start = end");
         }
-        bookingDto.setStatus(Status.WAITING);
-        bookingDto.setBookerId(id);
-        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user));
+        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user, Status.WAITING));
         return BookingMapper.toBookingDtoToResponse(booking);
     }
 
@@ -67,28 +64,28 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь не обнаружен");
         });
-        List<Booking> list = new ArrayList<>();
+        List<Booking> bookings = List.of();
         switch (statement) {
             case ALL:
-                list.addAll(bookingRepository.findAllByBookerIdOrderByStartDesc(userId));
+                bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
                 break;
             case CURRENT:
-                list.addAll(bookingRepository.findByBookerCurrent(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByBookerCurrent(userId, LocalDateTime.now());
                 break;
             case PAST:
-                list.addAll(bookingRepository.findByBookerPast(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByBookerPast(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                list.addAll(bookingRepository.findByBookerFuture(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByBookerFuture(userId, LocalDateTime.now());
                 break;
             case WAITING:
-                list.addAll(bookingRepository.findByBookerAndStatus(userId, Status.WAITING));
+                bookings = bookingRepository.findByBookerAndStatus(userId, Status.WAITING);
                 break;
             case REJECTED:
-                list.addAll(bookingRepository.findByBookerAndStatus(userId, Status.REJECTED));
+                bookings = bookingRepository.findByBookerAndStatus(userId, Status.REJECTED);
                 break;
         }
-        return list.stream()
+        return bookings.stream()
                 .map(BookingMapper::toBookingDtoToResponse).collect(Collectors.toList());
     }
 
@@ -104,28 +101,28 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь не обнаружен");
         });
-        List<Booking> list = new ArrayList<>();
+        List<Booking> bookings = List.of();
         switch (statement) {
             case ALL:
-                list.addAll(bookingRepository.findByItemUserIdOrderByStartDesc(userId));
+                bookings = bookingRepository.findByItemUserIdOrderByStartDesc(userId);
                 break;
             case CURRENT:
-                list.addAll(bookingRepository.findByItemOwnerCurrent(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByItemOwnerCurrent(userId, LocalDateTime.now());
                 break;
             case PAST:
-                list.addAll(bookingRepository.findByItemOwnerPast(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByItemOwnerPast(userId, LocalDateTime.now());
                 break;
             case FUTURE:
-                list.addAll(bookingRepository.findByItemOwnerFuture(userId, LocalDateTime.now()));
+                bookings = bookingRepository.findByItemOwnerFuture(userId, LocalDateTime.now());
                 break;
             case WAITING:
-                list.addAll(bookingRepository.findByItemOwnerAndStatus(userId, Status.WAITING));
+                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.WAITING);
                 break;
             case REJECTED:
-                list.addAll(bookingRepository.findByItemOwnerAndStatus(userId, Status.REJECTED));
+                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.REJECTED);
                 break;
         }
-        return list.stream().map(BookingMapper::toBookingDtoToResponse)
+        return bookings.stream().map(BookingMapper::toBookingDtoToResponse)
                 .collect(Collectors.toList());
     }
 

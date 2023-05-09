@@ -49,7 +49,6 @@ public class UserServiceImpl implements UserService {
         });
         if (newUser.getEmail() != null && !newUser.getEmail().equals(user.getEmail())
                 && !newUser.getEmail().isBlank()) {
-            //checkIfEmailExists(newUser.getEmail());
             user.setEmail(newUser.getEmail());
         }
         if (newUser.getName() != null && !newUser.getName().isBlank()) {

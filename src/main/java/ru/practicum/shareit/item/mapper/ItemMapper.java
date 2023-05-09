@@ -2,7 +2,10 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
+import ru.practicum.shareit.booking.dto.ShortBookingDtoToResponse;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoToResponse;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -25,18 +28,17 @@ public class ItemMapper {
                 user);
     }
 
-    public ItemBookingDto toItemDtoBooking(Item item) {
-        return new ItemBookingDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                null,
-                null,
-                new ArrayList<>()
-        );
+    public ItemBookingDto toItemDtoBooking(ItemBookingDto itemBookingDto, List<CommentDtoToResponse> commentList) {
+        return new ItemBookingDto(itemBookingDto.getId(),
+                itemBookingDto.getName(),
+                itemBookingDto.getDescription(),
+                itemBookingDto.getAvailable(),
+                itemBookingDto.getLastBooking(),
+                itemBookingDto.getNextBooking(),
+                commentList);
     }
 
-    public ItemBookingDto toItemDtoBooking(Item item, List<CommentDto> list) {
+    public ItemBookingDto toItemDtoBooking(Item item, List<CommentDtoToResponse> list) {
         return new ItemBookingDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -47,19 +49,8 @@ public class ItemMapper {
         );
     }
 
-    public ItemBookingDto toItemDtoBooking(Item item, BookingDto nextBookingShort,
-                                                  BookingDto lastBookingShort, List<CommentDto> itemComments) {
-        return new ItemBookingDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                lastBookingShort,
-                nextBookingShort,
-                itemComments);
-    }
-
-    public ItemBookingDto toItemDtoBooking(Item item, BookingDto nextBookingShort,
-                                                  BookingDto lastBookingShort) {
+    public ItemBookingDto toItemDtoBooking(Item item, ShortBookingDtoToResponse nextBookingShort,
+                                           ShortBookingDtoToResponse lastBookingShort) {
         return new ItemBookingDto(item.getId(),
                 item.getName(),
                 item.getDescription(),

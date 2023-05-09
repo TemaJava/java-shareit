@@ -11,9 +11,7 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,14 +20,12 @@ import java.time.LocalDateTime;
 public class BookingDto {
     @NotNull(groups = Update.class)
     private Long id;
-    @FutureOrPresent
     @NotNull
+    @FutureOrPresent
     private LocalDateTime start;
     @Future
     @NotNull
     private LocalDateTime end;
     @NotNull(groups = Create.class)
     private Long itemId;
-    private Long bookerId;
-    private Status status;
 }

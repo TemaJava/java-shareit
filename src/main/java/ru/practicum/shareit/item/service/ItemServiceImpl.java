@@ -2,9 +2,11 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.ShortBookingDtoToResponse;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -12,6 +14,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoToResponse;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -56,90 +59,31 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
         });
-
+        //изменена изначальная логика, тк через запрос не удавалось получить все необходимые бронирования
         List<Item> itemList = itemStorage.findAllByUserIdOrderByIdAsc(userId);
-        List<ItemBookingDto> itemBookingDtos = new ArrayList<>();
-        //помогло избежать обращений к бд в цикле
-        Map<Item, List<Booking>> bookings = bookingStorage.findByItemInOrderByStart(itemList)
-                .stream()
-                .collect(groupingBy(Booking::getItem, toList()));
-        for (Item item : itemList) {
-            Booking lastBooking = null;
-            Booking nextBooking = null;
-            if (bookings.get(item) != null) {
-                List<Booking> bookingList = new ArrayList<>(bookings.get(item));
-                for (Booking booking : bookingList) {
-                    if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
-                            booking.getStart().isBefore(LocalDateTime.now())) ||
-                            booking.getEnd().isBefore(LocalDateTime.now())) {
-                        lastBooking = booking;
-                    }
-                }
-                if (lastBooking != null) {
-                    bookingList.remove(lastBooking);
-                }
-                for (Booking booking : bookingList) {
-                    if (booking.getStart().isAfter(LocalDateTime.now())) {
-                        nextBooking = booking;
-                        break;
-                    }
-                }
-            }
-            BookingDto nextBookingDto = null;
-            BookingDto lastBookingDto = null;
-            if (nextBooking != null) {
-                nextBookingDto = BookingMapper.toBookingDto(nextBooking);
-            }
-            if (lastBooking != null) {
-                lastBookingDto = BookingMapper.toBookingDto(lastBooking);
-            }
-            itemBookingDtos.add(ItemMapper.toItemDtoBooking(item, nextBookingDto, lastBookingDto));
-        }
-        return itemBookingDtos;
+        return setBookings(itemList);
     }
 
     @Override
     public ItemBookingDto getItemById(long userId, long itemId) {
+
         Item item = itemStorage.findById(itemId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Предмет с id " + itemId + " не обнаружен");
         });
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь c id = " + userId + " не найден");
         });
+
         List<Comment> commentList = commentStorage.findAllComments(List.of(item.getId()));
-        List<CommentDto> commentDtoList = commentList.stream()
-                .map(CommentMapper::toCommentDto).collect(toList());
+        List<CommentDtoToResponse> commentDtoToResponseList = commentList.stream()
+                .map(CommentMapper::toCommentDtoToResponse).collect(toList());
         if (item.getUser().getId() == userId) {
-            Booking lastBooking = null;
-            Booking nextBooking = null;
-            List<Booking> bookingList = bookingStorage.findByItemAndStatusOrderByStart(item, Status.APPROVED);
-            for (Booking booking : bookingList) {
-                if ((booking.getEnd().isAfter(LocalDateTime.now()) &&
-                        booking.getStart().isBefore(LocalDateTime.now())) ||
-                        booking.getEnd().isBefore(LocalDateTime.now())) {
-                    lastBooking = booking;
-                }
-            }
-                if (lastBooking != null) {
-                    bookingList.remove(lastBooking);
-                }
-                for (Booking booking : bookingList) {
-                    if (booking.getStart().isAfter(LocalDateTime.now())) {
-                        nextBooking = booking;
-                        break;
-                    }
-                }
-                BookingDto nextBookingDto = null;
-                BookingDto lastBookingDto = null;
-                if (nextBooking != null) {
-                    nextBookingDto = BookingMapper.toBookingDto(nextBooking);
-                }
-                if (lastBooking != null) {
-                    lastBookingDto = BookingMapper.toBookingDto(lastBooking);
-                }
-            return ItemMapper.toItemDtoBooking(item, nextBookingDto, lastBookingDto, commentDtoList);
+            List<Item> items = new ArrayList<>();
+            items.add(item);
+            List<ItemBookingDto> itemBookingDtoList = setBookings(items);
+            return ItemMapper.toItemDtoBooking(itemBookingDtoList.get(0), commentDtoToResponseList);
         }
-        return ItemMapper.toItemDtoBooking(item, commentDtoList);
+        return ItemMapper.toItemDtoBooking(item, commentDtoToResponseList);
     }
 
     @Override
@@ -176,8 +120,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        commentDto.setCreated(LocalDateTime.now());
+    public CommentDtoToResponse addComment(long userId, long itemId, CommentDto commentDto) {
+        LocalDateTime now = LocalDateTime.now();
         User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id + " +
                 userId + " не обнаружен"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
@@ -187,11 +131,45 @@ public class ItemServiceImpl implements ItemService {
         for (Booking booking : bookingsList) {
             if (booking.getBooker().getId() == userId && booking.getItem().equals(item) &&
             booking.getEnd().isBefore(LocalDateTime.now())) {
-                Comment comment = CommentMapper.toComment(user, item, commentDto);
+                Comment comment = CommentMapper.toComment(user, item, commentDto, now);
                 commentStorage.save(comment);
-                return CommentMapper.toCommentDto(comment);
+                return CommentMapper.toCommentDtoToResponse(comment);
             }
         }
         throw new BookingException("Ошибка добавления комментария");
+    }
+
+    private List<ItemBookingDto> setBookings(List<Item> itemList) {
+        List<ItemBookingDto> itemBookingDtos = new ArrayList<>();
+        List<Long> idList = itemList.stream()
+                .map(Item::getId)
+                .collect(toList());
+        Map<Item, List<Booking>> bookingsItem = bookingStorage.getAllBookingByItem(idList,
+                        Status.APPROVED, Sort.by(Sort.Direction.DESC, "start")).stream()
+                .collect(groupingBy(Booking::getItem, toList()));
+        LocalDateTime now = LocalDateTime.now();
+        for (Item item : itemList) {
+            Booking lastBooking = null;
+            Booking nextBooking = null;
+            if (bookingsItem.get(item) != null) {
+                List<Booking> bookingList = bookingsItem.get(item);
+                nextBooking = bookingList.stream()
+                        .filter(b -> b.getStart().isAfter(now))
+                        .reduce((first, second) -> second).orElse(null);
+                lastBooking = bookingList.stream()
+                        .filter(b -> b.getStart().isBefore(now))
+                        .findFirst().orElse(null);
+            }
+            ShortBookingDtoToResponse nextBookingDto = null;
+            ShortBookingDtoToResponse lastBookingDto = null;
+            if (nextBooking != null) {
+                nextBookingDto = BookingMapper.toShortBookingDtoToResponse(nextBooking);
+            }
+            if (lastBooking != null) {
+                lastBookingDto = BookingMapper.toShortBookingDtoToResponse(lastBooking);
+            }
+            itemBookingDtos.add(ItemMapper.toItemDtoBooking(item, nextBookingDto, lastBookingDto));
+        }
+        return itemBookingDtos;
     }
 }
