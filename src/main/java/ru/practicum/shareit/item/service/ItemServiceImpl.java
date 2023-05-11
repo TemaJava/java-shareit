@@ -22,6 +22,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -41,6 +43,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userStorage;
     private final BookingRepository bookingStorage;
     private final CommentRepository commentStorage;
+    private final RequestRepository requestStorage;
 
     @Override
     @Transactional
@@ -48,7 +51,12 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
         });
-        Item item = itemStorage.save(ItemMapper.createItem(itemDto, user));
+        Request request = null;
+        if (itemDto.getRequestId() != null) {
+            request = requestStorage.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new ObjectNotFoundException("Запрос не найден"));
+        }
+        Item item = itemStorage.save(ItemMapper.createItem(itemDto, user, request));
         itemDto.setId(item.getId());
         return itemDto;
     }
@@ -58,7 +66,6 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.findById(userId).orElseThrow(() -> {
             throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
         });
-        //изменена изначальная логика, тк через запрос не удавалось получить все необходимые бронирования
         List<Item> itemList = itemStorage.findAllByUserIdOrderByIdAsc(userId);
         return setBookings(itemList);
     }

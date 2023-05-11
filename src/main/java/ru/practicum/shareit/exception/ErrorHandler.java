@@ -24,10 +24,10 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerValidationException(final ValidationException e) {
-        log.warn("409 {}", e.getMessage(), e);
-        return new ErrorResponse("Conflict exception 409", e.getMessage());
+        log.warn("400 {}", e.getMessage(), e);
+        return new ErrorResponse("Conflict exception 400", e.getMessage());
     }
 
     @ExceptionHandler
