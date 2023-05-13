@@ -120,6 +120,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
     }
+    
     @Test
     void deleteWithoutCreatingUserShouldReturnNotFound() throws Exception {
         long userId = 1;
