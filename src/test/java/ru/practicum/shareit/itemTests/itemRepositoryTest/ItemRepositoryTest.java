@@ -29,7 +29,6 @@ public class ItemRepositoryTest {
         itemRepository.save(item2);
         List<Item> listDesc = itemRepository.findAllByString("des");
         List<Item> listName = itemRepository.findAllByString("name");
-        
         assertEquals(1, listDesc.size());
         assertEquals(2, listName.size());
     }
