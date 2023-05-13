@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 
+
 @Getter
 @Setter
 @ToString
@@ -14,7 +15,7 @@ import javax.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private String name;
     @Column(unique = true)
     private String email;

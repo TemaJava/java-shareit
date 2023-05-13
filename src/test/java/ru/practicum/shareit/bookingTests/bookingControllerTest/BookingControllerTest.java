@@ -56,7 +56,7 @@ public class BookingControllerTest {
         User anotherUser = new User(2L, "Another name", "another@mail.com");
         userDto = UserMapper.toUserDto(user);
 
-        Item item = new Item(1, "itemName", "itemDesc", true, user, null);
+        Item item = new Item(1L, "itemName", "itemDesc", true, user, null);
         Booking booking = new Booking(1L, bookingStart, bookingEnd, item, anotherUser, Status.WAITING);
         bookingDto = BookingMapper.toBookingDto(booking);
         bookingDtoResponse = BookingMapper.toBookingDtoToResponse(booking);

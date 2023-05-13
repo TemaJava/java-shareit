@@ -46,8 +46,8 @@ class UserControllerTest {
 
     @BeforeEach
     void createUserDto() {
-        userDto = UserMapper.toUserDto(new User(1, "User test name", "userTestMail@mail.com"));
-        userAnotherDto = UserMapper.toUserDto(new User(2, "User Another test name",
+        userDto = UserMapper.toUserDto(new User(1L, "User test name", "userTestMail@mail.com"));
+        userAnotherDto = UserMapper.toUserDto(new User(2L, "User Another test name",
                 "userAnotherTestMail@mail.com"));
     }
 

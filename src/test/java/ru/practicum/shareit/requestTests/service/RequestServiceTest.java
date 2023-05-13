@@ -50,7 +50,7 @@ public class RequestServiceTest {
 
     @BeforeEach
     void createModels() {
-        user = new User(1, "UserName", "mail@mail.ru");
+        user = new User(1L, "UserName", "mail@mail.ru");
         request = new Request(1L, user, "test desc", now);
     }
 

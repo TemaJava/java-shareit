@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +28,15 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private ru.practicum.shareit.user.service.UserServiceImpl userService;
 
     private User user;
     private User anotherUser;
 
     @BeforeEach
     void createUser() {
-        user = new User(1, "User test name", "Usertest@mail.com");
-        anotherUser = new User(2, "AnotherUser test name", "AnotherEmail@mail.ru");
+        user = new User(1L, "User test name", "Usertest@mail.com");
+        anotherUser = new User(2L, "AnotherUser test name", "AnotherEmail@mail.ru");
     }
 
     @Test

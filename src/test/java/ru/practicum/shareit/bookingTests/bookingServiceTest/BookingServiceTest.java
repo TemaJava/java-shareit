@@ -67,7 +67,7 @@ public class BookingServiceTest {
     void creteModel() {
          user = new User(1L, "User name", "user@mail.com");
          anotherUser = new User(2L, "Another name", "another@mail.com");
-         item = new Item(1, "itemName", "itemDesc", true, user, null);
+         item = new Item(1L, "itemName", "itemDesc", true, user, null);
          booking = new Booking(1L, bookingStart, bookingEnd, item, anotherUser, Status.WAITING);
     }
 

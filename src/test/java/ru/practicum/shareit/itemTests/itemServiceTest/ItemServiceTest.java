@@ -66,9 +66,9 @@ public class ItemServiceTest {
 
     @BeforeEach
     void createModel() {
-        user = new User(1, "user name", "user@mail.ru");
-        anotherUser = new User(2, "Another user name", "another@mail.ru");
-        item = new Item(1, "itemName", "itemDesc", true, user, null);
+        user = new User(1L, "user name", "user@mail.ru");
+        anotherUser = new User(2L, "Another user name", "another@mail.ru");
+        item = new Item(1L, "itemName", "itemDesc", true, user, null);
         booking = new Booking(1L, bookingStart, bookingEnd, item, anotherUser, Status.WAITING);
         comment = new Comment(1L, "commentText", item, anotherUser, now);
     }

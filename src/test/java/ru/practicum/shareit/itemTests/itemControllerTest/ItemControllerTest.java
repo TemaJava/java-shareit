@@ -67,7 +67,7 @@ public class ItemControllerTest {
         User anotherUser = new User(2L, "Another name", "another@mail.com");
         anotherUserDto = UserMapper.toUserDto(anotherUser);
 
-        Item item = new Item(1, "itemName", "itemDesc", true, user, null);
+        Item item = new Item(1L, "itemName", "itemDesc", true, user, null);
         itemDto = ItemMapper.createItemDto(item);
         itemBookingDto = ItemMapper.toItemDtoBooking(item, null);
 

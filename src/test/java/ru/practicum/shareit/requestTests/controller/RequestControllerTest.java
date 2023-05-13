@@ -54,7 +54,7 @@ public class RequestControllerTest {
 
     @BeforeEach
     void createModels() {
-        user = new User(1, "test name", "test@maiil.ru");
+        user = new User(1L, "test name", "test@maiil.ru");
         request = new Request(1L, user, "desc", now);
         requestDto = RequestMapper.toRequestDto(request);
         requestDtoToResponse = RequestMapper.toRequestDtoResponse(request);
