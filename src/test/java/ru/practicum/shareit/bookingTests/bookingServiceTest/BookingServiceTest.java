@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.IncorrectStateException;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -93,10 +94,34 @@ public class BookingServiceTest {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.createBooking(anotherUser.getId(),
+                        BookingMapper.toBookingDto(booking)));
+        assertEquals("Предмет недоступен для брони", exception.getMessage());
+    }
+
+    @Test
+    void createBookingWithOwnerUserShouldThrowExceptionTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
         ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
                 () -> bookingService.createBooking(user.getId(),
                         BookingMapper.toBookingDto(booking)));
         assertEquals("Вы не можете забронировать этот предмет", exception.getMessage());
+    }
+
+    @Test
+    void createBookingWithNotCreatedUserShouldThrowExceptionTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.createBooking(user.getId(),
+                        BookingMapper.toBookingDto(booking)));
+        assertEquals("Ошибка пользователя", exception.getMessage());
     }
 
     @Test
@@ -109,6 +134,32 @@ public class BookingServiceTest {
                 () -> bookingService.createBooking(user.getId(),
                         BookingMapper.toBookingDto(booking)));
         assertEquals("Предмет с id " + item.getId() + " не обнаружен", exception.getMessage());
+    }
+
+    @Test
+    void createBookingWithWrongBookingStartItemShouldThrowExceptionTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+        booking.setStart(now);
+        booking.setEnd(now.minusHours(1));
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.createBooking(anotherUser.getId(),
+                        BookingMapper.toBookingDto(booking)));
+        assertEquals("неверное время", exception.getMessage());
+    }
+
+    @Test
+    void createBookingWithStartEqualsEndShouldThrowExceptionTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+        booking.setStart(now);
+        booking.setEnd(now);
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.createBooking(anotherUser.getId(),
+                        BookingMapper.toBookingDto(booking)));
+        assertEquals("Start = end", exception.getMessage());
     }
 
     @Test
@@ -201,6 +252,19 @@ public class BookingServiceTest {
         assertEquals(anotherUser.getId(), bookingDtoResponses.get(0).getBooker().getId());
         assertEquals(Status.WAITING, bookingDtoResponses.get(0).getStatus());
     }
+
+    @Test
+    void getBookingByOwnerWithUnknownUserShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(bookingRepository.findByItemOwnerAndStatus(anyLong(), any(Status.class), any(PageRequest.class)))
+                .thenReturn(List.of(booking));
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.getBookingByBooker(user.getId(), "CURRENT",
+                        Pagination.toPageable(1, 1)));
+        assertEquals("Пользователь не обнаружен", exception.getMessage());
+    }
+
 
     @Test
     void getBookingByBookerWithStatusAll() {
@@ -314,6 +378,18 @@ public class BookingServiceTest {
     }
 
     @Test
+    void getBookingByBookerWithUnknownUserShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(bookingRepository.findByItemOwnerAndStatus(anyLong(), any(Status.class), any(PageRequest.class)))
+                .thenReturn(List.of(booking));
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.getBookingByOwner(user.getId(), "CURRENT",
+                        Pagination.toPageable(1, 1)));
+        assertEquals("Пользователь не обнаружен", exception.getMessage());
+    }
+
+    @Test
     void changeBookingStatusTest() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
@@ -334,10 +410,31 @@ public class BookingServiceTest {
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
         ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
-                () -> bookingService.changeBookingStatus(
-                        anotherUser.getId(),
-                        booking.getId(),
-                        true));
+                () -> bookingService.changeBookingStatus(anotherUser.getId(), booking.getId(), true));
+        assertEquals("Изменять статус может только владелец вещи", exception.getMessage());
+    }
+
+    @Test
+    void changeBookingStatusWithUnknownBookingTest() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(anotherUser));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.changeBookingStatus(anotherUser.getId(), booking.getId(), true));
+        assertEquals("Бронь не найдена", exception.getMessage());
+    }
+
+    @Test
+    void changeApprovedBookingStatusTest() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(anotherUser));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        booking.setStatus(Status.APPROVED);
+        BookingException exception = assertThrows(BookingException.class,
+                () -> bookingService.changeBookingStatus(user.getId(), booking.getId(), false));
+        assertEquals("Нельзя изменить статус", exception.getMessage());
     }
 
     @Test
@@ -350,6 +447,29 @@ public class BookingServiceTest {
         assertEquals(item.getId(), bookingDtoResponse.getItem().getId());
         assertEquals(anotherUser.getId(), bookingDtoResponse.getBooker().getId());
         assertEquals(Status.WAITING, bookingDtoResponse.getStatus());
+    }
+
+    @Test
+    void getUnknownBookingTest() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        booking.setStatus(Status.APPROVED);
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.getBookingInfo(user.getId(), booking.getId()));
+        assertEquals("Бронь не найдена", exception.getMessage());
+    }
+
+    @Test
+    void getBookingWithNotOwnerOrBookerTest() {
+        User user3 = new User(3L, "name", "mail@mail.ru");
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.ofNullable(booking));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user3));
+
+        booking.setStatus(Status.APPROVED);
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.getBookingInfo(user3.getId(), booking.getId()));
+        assertEquals("Ошибка доступа - пользователь не создатель и не бронирующий", exception.getMessage());
     }
 }
 
