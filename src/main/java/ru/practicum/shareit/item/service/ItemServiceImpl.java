@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto createItem(long userId, ItemDto itemDto) {
         User user = userStorage.findById(userId).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
+            throw new ObjectNotFoundException("Пользователь с id = " + userId + " не найден");
         });
         Request request = null;
         if (itemDto.getRequestId() != null) {
@@ -64,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemBookingDto> getAllUsersItems(long userId) {
         User user = userStorage.findById(userId).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
+            throw new ObjectNotFoundException("Пользователь c id = " + userId + " не найден");
         });
         List<Item> itemList = itemStorage.findAllByUserIdOrderByIdAsc(userId);
         return setBookings(itemList);
@@ -128,7 +128,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDtoToResponse addComment(long userId, long itemId, CommentDto commentDto) {
         LocalDateTime now = LocalDateTime.now();
-        User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id + " +
+        User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id " +
                 userId + " не обнаружен"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
                 new ObjectNotFoundException("Предмет с id " + itemId + " не обнаружен"));

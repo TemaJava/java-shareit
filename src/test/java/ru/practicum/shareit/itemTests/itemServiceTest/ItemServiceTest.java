@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDtoToResponse;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -19,6 +20,10 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -28,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +53,9 @@ public class ItemServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private RequestRepository requestRepository;
 
     private User user;
 
@@ -86,6 +95,26 @@ public class ItemServiceTest {
     }
 
     @Test
+    void createItemWithUnknownUserShouldThrowExceptionTest() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.createItem(1L, ItemMapper.createItemDto(item)));
+        assertEquals("Пользователь с id = " + 1 + " не найден", exception.getMessage());
+    }
+
+    @Test
+    void createItemWithUnknownRequestShouldThrowExceptionTest() {
+        when(requestRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
+
+        item.setRequest(new Request(1L, user, "desc", now));
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.createItem(1L, ItemMapper.createItemDto(item)));
+        assertEquals("Запрос не найден", exception.getMessage());
+    }
+
+    @Test
     void getItemById() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
@@ -109,6 +138,15 @@ public class ItemServiceTest {
     }
 
     @Test
+    void getAllUsersItemsWithUnknownUserShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.getAllUsersItems(user.getId()));
+        assertEquals("Пользователь c id = " + user.getId() + " не найден", exception.getMessage());
+    }
+
+    @Test
     void updateItem() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
 
@@ -117,6 +155,25 @@ public class ItemServiceTest {
         ItemDto itemDto1 = itemService.updateItem(user.getId(), item.getId(), itemDto);
         assertEquals(itemDto1.getDescription(), itemDto.getDescription());
         assertEquals(itemDto1.getName(), itemDto.getName());
+    }
+
+    @Test
+    void updateItemWithUnknownUserShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.getItemById(user.getId(), item.getId()));
+        assertEquals("Пользователь c id = " + user.getId() + " не найден", exception.getMessage());
+    }
+
+    @Test
+    void updateItemWithUnknownItemShouldThrowException() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.getItemById(user.getId(), item.getId()));
+        assertEquals("Предмет с id " + item.getId() + " не обнаружен", exception.getMessage());
     }
 
     @Test
@@ -182,5 +239,24 @@ public class ItemServiceTest {
                 .addComment(2L, 1L, CommentMapper.toCommentDto(comment));
         assertEquals("commentText", commentDtoToResponse.getText());
         assertEquals("user name", commentDtoToResponse.getAuthorName());
+    }
+
+    @Test
+    void addCommentWithUnknownUserShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.addComment(user.getId(), item.getId(), CommentMapper.toCommentDto(comment)));
+        assertEquals("Пользователь с id " + user.getId() + " не обнаружен", exception.getMessage());
+    }
+
+    @Test
+    void addCommentWithUnknownItemShouldThrowException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
+                () -> itemService.addComment(user.getId(), item.getId(), CommentMapper.toCommentDto(comment)));
+        assertEquals("Предмет с id " + item.getId() + " не обнаружен", exception.getMessage());
     }
 }

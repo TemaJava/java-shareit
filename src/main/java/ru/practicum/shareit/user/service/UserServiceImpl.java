@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto deleteUser(long id) {
         User user = repository.findById(id).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Пользователь с id = " + id + " для обновления не найден");
+            throw new ObjectNotFoundException("Пользователь с id = " + id + " для удаления не найден");
         });
         repository.delete(user);
         return UserMapper.toUserDto(user);

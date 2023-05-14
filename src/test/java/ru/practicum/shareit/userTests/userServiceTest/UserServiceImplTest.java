@@ -10,6 +10,7 @@ import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private ru.practicum.shareit.user.service.UserServiceImpl userService;
+    private UserServiceImpl userService;
 
     private User user;
     private User anotherUser;
@@ -87,7 +88,18 @@ public class UserServiceImplTest {
 
         UserDto userDto = userService.createUser(UserMapper.toUserDto(user));
         userDto.setEmail("NewMail@User.ru");
+        userDto.setName("newName");
         assertThat(userService.updateUser(userDto.getId(), userDto)).isEqualTo(userDto);
+    }
+
+    @Test
+    void updateUserWhenUserIsNotExistsShouldThrowObjectNotFound() {
+        when(userRepository.findById(0L))
+                .thenReturn(Optional.empty());
+
+        ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class,
+                () -> userService.updateUser(0L, new UserDto()));
+        assertEquals("Пользователь с id = " + 0 + " для обновления не найден", ex.getMessage());
     }
 
     @Test
@@ -104,11 +116,9 @@ public class UserServiceImplTest {
     void deleteUserWithNoUserThrowsExceptionTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        UserDto userDto = UserMapper.toUserDto(user);
-        userDto.setId(999);
         ObjectNotFoundException exc = assertThrows(ObjectNotFoundException.class,
                 () -> userService.deleteUser(999)
         );
-        assertEquals("Пользователь с id = " + 999 + " для обновления не найден", exc.getMessage());
+        assertEquals("Пользователь с id = " + 999 + " для удаления не найден", exc.getMessage());
     }
 }
