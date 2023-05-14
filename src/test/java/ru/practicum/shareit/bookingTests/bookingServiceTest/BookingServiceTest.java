@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
@@ -131,7 +132,8 @@ public class BookingServiceTest {
         when(bookingRepository.findByItemOwnerCurrent(anyLong(), any(LocalDateTime.class), any(PageRequest.class)))
                 .thenReturn(List.of(booking));
 
-        List<BookingDtoToResponse> bookingDtoResponses = bookingService.getBookingByOwner(user.getId(), "CURRENT",
+        List<BookingDtoToResponse> bookingDtoResponses = bookingService.getBookingByOwner(user.getId(),
+                String.valueOf(State.CURRENT),
                 Pagination.toPageable(1, 1));
         assertEquals(1, bookingDtoResponses.size());
         assertEquals(1, bookingDtoResponses.get(0).getId());
