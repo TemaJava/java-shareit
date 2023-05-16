@@ -3,7 +3,7 @@ package ru.practicum.shareit.request.mapper;
 import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.dto.RequestDtoToResponse;
+import ru.practicum.shareit.request.dto.RequestDtoResponse;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
@@ -25,8 +25,8 @@ public class RequestMapper {
                 itemRequest.getCreated());
     }
 
-    public static RequestDtoToResponse toRequestDtoResponse(Request itemRequest) {
-        return new RequestDtoToResponse(itemRequest.getId(),
+    public static RequestDtoResponse toRequestDtoResponse(Request itemRequest) {
+        return new RequestDtoResponse(itemRequest.getId(),
                 itemRequest.getUser().getId(),
                 itemRequest.getDescription(),
                 itemRequest.getCreated(),

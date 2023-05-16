@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.request.controller.RequestController;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestDtoToResponse;
+import ru.practicum.shareit.request.dto.RequestDtoResponse;
 import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.service.RequestService;
@@ -47,7 +47,7 @@ public class RequestControllerTest {
     private final ObjectMapper objectMapper;
 
     private User user;
-    private RequestDtoToResponse requestDtoToResponse;
+    private RequestDtoResponse requestDtoToResponse;
     private RequestDto requestDto;
     private Request request;
     LocalDateTime now = LocalDateTime.now();

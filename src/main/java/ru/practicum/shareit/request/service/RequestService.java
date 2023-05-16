@@ -2,7 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestDtoToResponse;
+import ru.practicum.shareit.request.dto.RequestDtoResponse;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import java.util.List;
 public interface RequestService {
     RequestDto createRequest(RequestDto dto, long userId);
 
-    List<RequestDtoToResponse> getRequests(long userId);
+    List<RequestDtoResponse> getRequests(long userId);
 
-    List<RequestDtoToResponse> getOtherUserRequests(long userId, Pageable pageable);
+    List<RequestDtoResponse> getOtherUserRequests(long userId, Pageable pageable);
 
-    RequestDtoToResponse getRequestById(long requestId, long userId);
+    RequestDtoResponse getRequestById(long requestId, long userId);
 }

@@ -11,7 +11,7 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestDtoToResponse;
+import ru.practicum.shareit.request.dto.RequestDtoResponse;
 import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
@@ -41,9 +41,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDtoToResponse> getRequests(long userId) {
+    public List<RequestDtoResponse> getRequests(long userId) {
         userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь не найден"));
-        List<RequestDtoToResponse> list = requestStorage.findAllByUserIdOrderByCreatedDesc(userId)
+        List<RequestDtoResponse> list = requestStorage.findAllByUserIdOrderByCreatedDesc(userId)
                 .stream()
                 .map(RequestMapper::toRequestDtoResponse)
                 .collect(Collectors.toList());
@@ -51,9 +51,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDtoToResponse> getOtherUserRequests(long userId, Pageable pageable) {
+    public List<RequestDtoResponse> getOtherUserRequests(long userId, Pageable pageable) {
         userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь не найден"));
-        List<RequestDtoToResponse> list = requestStorage.findAllByUserIdIsNotOrderByCreatedDesc(userId, pageable)
+        List<RequestDtoResponse> list = requestStorage.findAllByUserIdIsNotOrderByCreatedDesc(userId, pageable)
                 .stream()
                 .map(RequestMapper::toRequestDtoResponse)
                 .collect(Collectors.toList());
@@ -61,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public RequestDtoToResponse getRequestById(long requestId, long userId) {
+    public RequestDtoResponse getRequestById(long requestId, long userId) {
         userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь не найден"));
         Request request = requestStorage.findById(requestId)
                 .orElseThrow(() -> new ObjectNotFoundException("Запрос не найден"));
@@ -69,11 +69,11 @@ public class RequestServiceImpl implements RequestService {
         return setItemsToRequests(List.of(RequestMapper.toRequestDtoResponse(request))).get(0);
     }
 
-    private List<RequestDtoToResponse> setItemsToRequests(List<RequestDtoToResponse> itemRequestDtoResponseList) {
-        Map<Long, RequestDtoToResponse> requests = itemRequestDtoResponseList.stream()
-                .collect(Collectors.toMap(RequestDtoToResponse::getId, film -> film, (a, b) -> b));
+    private List<RequestDtoResponse> setItemsToRequests(List<RequestDtoResponse> itemRequestDtoResponseList) {
+        Map<Long, RequestDtoResponse> requests = itemRequestDtoResponseList.stream()
+                .collect(Collectors.toMap(RequestDtoResponse::getId, film -> film, (a, b) -> b));
         List<Long> ids = requests.values().stream()
-                .map(RequestDtoToResponse::getId)
+                .map(RequestDtoResponse::getId)
                 .collect(Collectors.toList());
         List<ItemDto> items = itemStorage.searchByRequestsId(ids).stream()
                 .map(ItemMapper::createItemDto)

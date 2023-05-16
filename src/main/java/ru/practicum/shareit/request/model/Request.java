@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.model;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -23,5 +24,6 @@ public class Request {
     private User user;
     @NotBlank
     private String description;
+    @CreationTimestamp
     private LocalDateTime created;
 }

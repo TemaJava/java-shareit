@@ -11,7 +11,7 @@ import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.pagination.Pagination;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestDtoToResponse;
+import ru.practicum.shareit.request.dto.RequestDtoResponse;
 import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.repository.RequestRepository;
@@ -79,7 +79,7 @@ public class RequestServiceTest {
     void getOwnRequestsWithEmptyRequestsShouldReturnEmptyList() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
 
-        List<RequestDtoToResponse> responseList = requestService.getRequests(user.getId());
+        List<RequestDtoResponse> responseList = requestService.getRequests(user.getId());
         assertTrue(responseList.isEmpty());
     }
 
@@ -94,7 +94,7 @@ public class RequestServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
         when(requestRepository.findAllByUserIdOrderByCreatedDesc(anyLong())).thenReturn(requests);
 
-        List<RequestDtoToResponse> responseList = requestService.getRequests(user.getId());
+        List<RequestDtoResponse> responseList = requestService.getRequests(user.getId());
         assertEquals("test desc", responseList.get(0).getDescription());
         assertEquals(2, responseList.get(1).getId());
     }
@@ -114,7 +114,7 @@ public class RequestServiceTest {
         when(requestRepository.findAllByUserIdIsNotOrderByCreatedDesc(anyLong(), any(PageRequest.class)))
                 .thenReturn(List.of(request));
 
-        List<RequestDtoToResponse> itemRequestDtos = requestService.getOtherUserRequests(
+        List<RequestDtoResponse> itemRequestDtos = requestService.getOtherUserRequests(
                 user.getId(),
                 PageRequest.of(10, 10));
         assertEquals(1, itemRequestDtos.get(0).getId());
@@ -137,7 +137,7 @@ public class RequestServiceTest {
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
         when(requestRepository.findById(anyLong())).thenReturn(Optional.of(request));
-        RequestDtoToResponse request1 = requestService.getRequestById(requestDto.getId(), user.getId());
+        RequestDtoResponse request1 = requestService.getRequestById(requestDto.getId(), user.getId());
         assertEquals(request1.getId(), requestDto.getId());
         assertEquals(request1.getDescription(), requestDto.getDescription());
     }
