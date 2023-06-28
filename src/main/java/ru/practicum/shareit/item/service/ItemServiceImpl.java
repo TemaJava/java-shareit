@@ -16,12 +16,14 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentDtoToResponse;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.CommentMapper;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -41,14 +43,20 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userStorage;
     private final BookingRepository bookingStorage;
     private final CommentRepository commentStorage;
+    private final RequestRepository requestStorage;
 
     @Override
     @Transactional
     public ItemDto createItem(long userId, ItemDto itemDto) {
         User user = userStorage.findById(userId).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
+            throw new ObjectNotFoundException("Пользователь с id = " + userId + " не найден");
         });
-        Item item = itemStorage.save(ItemMapper.createItem(itemDto, user));
+        Request request = null;
+        if (itemDto.getRequestId() != null) {
+            request = requestStorage.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new ObjectNotFoundException("Запрос не найден"));
+        }
+        Item item = itemStorage.save(ItemMapper.createItem(itemDto, user, request));
         itemDto.setId(item.getId());
         return itemDto;
     }
@@ -56,9 +64,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemBookingDto> getAllUsersItems(long userId) {
         User user = userStorage.findById(userId).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Пользователь не c id = " + userId + " не найден");
+            throw new ObjectNotFoundException("Пользователь c id = " + userId + " не найден");
         });
-        //изменена изначальная логика, тк через запрос не удавалось получить все необходимые бронирования
         List<Item> itemList = itemStorage.findAllByUserIdOrderByIdAsc(userId);
         return setBookings(itemList);
     }
@@ -121,7 +128,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDtoToResponse addComment(long userId, long itemId, CommentDto commentDto) {
         LocalDateTime now = LocalDateTime.now();
-        User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id + " +
+        User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь с id " +
                 userId + " не обнаружен"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
                 new ObjectNotFoundException("Предмет с id " + itemId + " не обнаружен"));

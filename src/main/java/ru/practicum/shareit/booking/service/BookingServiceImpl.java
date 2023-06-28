@@ -2,14 +2,15 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoToResponse;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.IncorrectStateException;
@@ -53,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoToResponse> getBookingByBooker(long userId, String state) {
+    public List<BookingDtoToResponse> getBookingByBooker(long userId, String state, Pageable pagination) {
         State statement;
         try {
             statement = State.valueOf(state);
@@ -67,22 +68,22 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = List.of();
         switch (statement) {
             case ALL:
-                bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, pagination);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByBookerCurrent(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerCurrent(userId, LocalDateTime.now(), pagination);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBookerPast(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerPast(userId, LocalDateTime.now(), pagination);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerFuture(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerFuture(userId, LocalDateTime.now(), pagination);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBookerAndStatus(userId, Status.WAITING);
+                bookings = bookingRepository.findByBookerAndStatus(userId, Status.WAITING, pagination);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBookerAndStatus(userId, Status.REJECTED);
+                bookings = bookingRepository.findByBookerAndStatus(userId, Status.REJECTED, pagination);
                 break;
         }
         return bookings.stream()
@@ -90,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoToResponse> getBookingByOwner(long userId, String state) {
+    public List<BookingDtoToResponse> getBookingByOwner(long userId, String state, Pageable pagination) {
         State statement;
         try {
             statement = State.valueOf(state);
@@ -104,22 +105,22 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = List.of();
         switch (statement) {
             case ALL:
-                bookings = bookingRepository.findByItemUserIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByItemUserIdOrderByStartDesc(userId, pagination);
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByItemOwnerCurrent(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerCurrent(userId, LocalDateTime.now(), pagination);
                 break;
             case PAST:
-                bookings = bookingRepository.findByItemOwnerPast(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerPast(userId, LocalDateTime.now(), pagination);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByItemOwnerFuture(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerFuture(userId, LocalDateTime.now(), pagination);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.WAITING);
+                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.WAITING, pagination);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.REJECTED);
+                bookings = bookingRepository.findByItemOwnerAndStatus(userId, Status.REJECTED, pagination);
                 break;
         }
         return bookings.stream().map(BookingMapper::toBookingDtoToResponse)
