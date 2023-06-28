@@ -1,0 +1,16 @@
+ShareItTests.class
+ru\practicum\shareit\bookingTest\bookingDtoTest\BookingDtoToResponseTest.class
+ru\practicum\shareit\bookingTest\bookingDtoTest\BookingDtoTest.class
+ru\practicum\shareit\itemTest\itemControllerTest\ItemControllerTest.class
+ru\practicum\shareit\itemTest\itemServiceTest\ItemServiceIntegrationTest.class
+ru\practicum\shareit\userTest\userControllerTest\UserControllerTest.class
+ru\practicum\shareit\bookingTest\bookingRepositoryTest\BookingRepositoryTest.class
+ru\practicum\shareit\userTest\userServiceTest\UserServiceImplTest.class
+ru\practicum\shareit\requestTest\requestControllerTest\RequestControllerTest.class
+ru\practicum\shareit\requestTest\requestServiceTest\RequestServiceTest.class
+ru\practicum\shareit\bookingTest\bookingControllerTest\BookingControllerTest.class
+ru\practicum\shareit\bookingTest\bookingServiceTest\BookingServiceTest.class
+ru\practicum\shareit\itemTest\itemDtoTest\ItemBookingDtoTest.class
+ru\practicum\shareit\userTest\userMapperTest\UserMapperTests.class
+ru\practicum\shareit\itemTest\itemServiceTest\ItemServiceTest.class
+ru\practicum\shareit\paginationTest\PaginationTest.class
