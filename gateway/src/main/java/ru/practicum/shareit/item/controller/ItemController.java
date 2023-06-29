@@ -9,7 +9,6 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.validation.Create;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
