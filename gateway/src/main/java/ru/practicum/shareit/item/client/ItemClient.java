@@ -36,7 +36,8 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> create(long userId, ItemDto itemDto) {
         if (itemDto.getName().isBlank()) throw new ValidationException("Нельзя создать предмет с пустым именем");
-        if (itemDto.getDescription().isBlank()) throw new ValidationException("Нельзя содать предмет без описания");
+        if (itemDto.getDescription().isBlank() ||
+        itemDto.getDescription() == null) throw new ValidationException("Нельзя содать предмет без описания");
         return post("", userId, itemDto);
     }
 
