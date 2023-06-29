@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.validation.Create;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -21,7 +22,7 @@ public class BookingController {
 	private final BookingClient bookingClient;
 
 	@PostMapping
-	public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long id, @Validated(Create.class) @RequestBody BookingDto bookingDto) {
+	public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long id, @Valid @RequestBody BookingDto bookingDto) {
 		return bookingClient.create(id, bookingDto);
 	}
 
