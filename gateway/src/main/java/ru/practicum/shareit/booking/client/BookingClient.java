@@ -13,6 +13,7 @@ import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.IncorrectStateException;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -28,9 +29,20 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(long userId, BookingDto bookingDto) {
-        if ((bookingDto.getEnd().isBefore(bookingDto.getStart())) || bookingDto.getEnd() == null ||
-                bookingDto.getStart() == null) {
-            throw new BookingException("Wrong time to book this item");
+        if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
+            throw new BookingException("неверное время");
+        }
+        if (bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new BookingException("Start = end");
+        }
+        if (bookingDto.getStart() == null) {
+            throw new BookingException("Отсутствует начало брони");
+        }
+        if (bookingDto.getEnd() == null) {
+            throw new BookingException("Отсутствует конец брони");
+        }
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            throw new BookingException("Начало брони невозможно в прошеднем времени");
         }
         return post("", userId, bookingDto);
     }

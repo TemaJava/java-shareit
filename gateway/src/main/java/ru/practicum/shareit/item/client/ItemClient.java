@@ -8,6 +8,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
@@ -34,6 +35,8 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(long userId, ItemDto itemDto) {
+        if (itemDto.getName().isBlank()) throw new ValidationException("Нельзя создать предмет с пустым именем");
+        if (itemDto.getDescription().isBlank()) throw new ValidationException("Нельзя содать предмет без описания");
         return post("", userId, itemDto);
     }
 
@@ -50,6 +53,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addComment(long userId, long itemId, CommentDto commentDto) {
+        if (commentDto.getText().isBlank()) throw new ValidationException("Коммент без текста невозможно создать");
         return post("/" + itemId + "/comment", userId, commentDto);
     }
 }
