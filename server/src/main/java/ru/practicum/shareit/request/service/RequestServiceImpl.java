@@ -33,6 +33,7 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userStorage;
 
     @Override
+    @Transactional
     public RequestDto createRequest(RequestDto requestDto, long userId) {
         User user = userStorage.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Пользователь не найден"));
         requestDto.setCreated(LocalDateTime.now());

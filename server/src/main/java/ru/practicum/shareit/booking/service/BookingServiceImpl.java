@@ -43,12 +43,6 @@ public class BookingServiceImpl implements BookingService {
         });
         if (item.getUser().getId() == id) throw new ObjectNotFoundException("Вы не можете забронировать этот предмет");
         if (!item.getAvailable()) throw new BookingException("Предмет недоступен для брони");
-        if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
-            throw new BookingException("неверное время");
-        }
-        if (bookingDto.getStart().equals(bookingDto.getEnd())) {
-            throw new BookingException("Start = end");
-        }
         Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user, Status.WAITING));
         return BookingMapper.toBookingDtoToResponse(booking);
     }
